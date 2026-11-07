@@ -12,7 +12,12 @@ export class HttpError extends Error {
 export function authorizeRequest(request: Request) {
   const origin = request.headers.get('origin');
   const url = new URL(request.url);
-  if (!origin || origin !== url.origin)
+  // Next can reconstruct the internal URL with localhost even for a loopback
+  // request to 127.0.0.1. The browser-visible Host is the CSRF boundary.
+  const expectedOrigin =
+    process.env.APP_ORIGIN ||
+    `${url.protocol}//${request.headers.get('host') || url.host}`;
+  if (!origin || origin !== expectedOrigin)
     throw new HttpError(403, 'Diese Anfrage stammt nicht von der Testseite.');
   const code = process.env.ACCESS_CODE ?? '';
   if (process.env.NODE_ENV === 'production' && code.length < 16)
@@ -28,7 +33,11 @@ export function authorizeRequest(request: Request) {
       !timingSafeEqual(supplied, expected)
     )
       throw new HttpError(401, 'Bitte gib den richtigen Zugangscode ein.');
-  } else if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) {
+  } else if (
+    !['localhost', '127.0.0.1', '[::1]'].includes(
+      new URL(expectedOrigin).hostname,
+    )
+  ) {
     throw new HttpError(
       503,
       'Öffentlicher Zugriff erfordert einen Zugangscode.',

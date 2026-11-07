@@ -1,4 +1,23 @@
 import { test, expect } from '@playwright/test';
+test('echter API-Endpunkt akzeptiert die sichtbare Origin und verweigert fremde Origins', async ({
+  request,
+}) => {
+  const status = await (await request.get('/api/status')).json();
+  test.skip(
+    status.needsAccessCode,
+    'Der lokale Server ist durch einen individuellen Zugangscode geschützt.',
+  );
+  const own = await request.post('/api/session', {
+    headers: { Origin: 'http://127.0.0.1:3000' },
+    data: {},
+  });
+  expect(own.status()).toBe(400); // Validation reached; no model call or key required.
+  const foreign = await request.post('/api/session', {
+    headers: { Origin: 'https://fremd.example' },
+    data: {},
+  });
+  expect(foreign.status()).toBe(403);
+});
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/status', (route) =>
     route.fulfill({

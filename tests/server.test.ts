@@ -20,6 +20,15 @@ const request = (origin = 'http://localhost:3000', code = '') =>
   });
 
 describe('API-Zugriff', () => {
+  it('prüft den sichtbaren Host, wenn Next intern localhost als Request-URL verwendet', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('ACCESS_CODE', '');
+    const local = new Request('http://localhost:3000/api/session', {
+      method: 'POST',
+      headers: { origin: 'http://127.0.0.1:3000', host: '127.0.0.1:3000' },
+    });
+    expect(() => authorizeRequest(local)).not.toThrow();
+  });
   it('verweigert fremde Origins und im Produktionsbetrieb fehlende Zugangscodes', () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('ACCESS_CODE', '');

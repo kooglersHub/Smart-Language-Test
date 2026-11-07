@@ -75,13 +75,14 @@ Beim Audioabschluss endet die Aufnahme sofort. Bereits gesendete Sprache bekommt
 
 ## KI-Konfiguration
 
-| Variable                  | Bedeutung                                                            |
-| ------------------------- | -------------------------------------------------------------------- |
-| `GEMINI_API_KEY`          | Dauerhafter Schlüssel, ausschließlich serverseitig                   |
-| `GEMINI_TEXT_MODEL`       | Textdialog; Standard `gemini-3.8-flash`                              |
-| `GEMINI_ASSESSMENT_MODEL` | Separate Auswertung; Standard `gemini-3.8-flash`                     |
-| `GEMINI_LIVE_MODEL`       | Audio; Standard `gemini-3.8-live`                                    |
-| `ACCESS_CODE`             | Gemeinsamer Zugangscode; im Produktionsbetrieb mindestens 16 Zeichen |
+| Variable                  | Bedeutung                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`          | Dauerhafter Schlüssel, ausschließlich serverseitig                                                       |
+| `GEMINI_TEXT_MODEL`       | Textdialog; Standard `gemini-3.8-flash`                                                                  |
+| `GEMINI_ASSESSMENT_MODEL` | Separate Auswertung; Standard `gemini-3.8-flash`                                                         |
+| `GEMINI_LIVE_MODEL`       | Audio; Standard `gemini-3.8-live`                                                                        |
+| `ACCESS_CODE`             | Gemeinsamer Zugangscode; im Produktionsbetrieb mindestens 16 Zeichen                                     |
+| `APP_ORIGIN`              | Externe Origin hinter einem Reverse-Proxy, z. B. `https://test.example` ohne abschließenden Schrägstrich |
 
 Modellzugang, Kontingente und Preise hängen vom Anbieter und Konto ab. Die App verspricht keinen kostenlosen Dauerbetrieb. Die Modelle können über Umgebungsvariablen gewechselt werden. Die Auswertung ist eine getrennte Anfrage mit eigener Anweisung; standardmäßig nutzt sie dieselbe Textmodellfamilie und ist kein unabhängig trainierter Zweitprüfer.
 

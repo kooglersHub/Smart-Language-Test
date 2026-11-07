@@ -22,7 +22,11 @@ export interface Turn {
   endMs?: number;
   unreliable?: boolean;
 }
-export interface SessionEvent { type: string; atMs: number; detail?: string }
+export interface SessionEvent {
+  type: string;
+  atMs: number;
+  detail?: string;
+}
 export interface Assessment {
   level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'nicht beurteilbar';
   b2: 'wahrscheinlich' | 'noch nicht' | 'unklar';

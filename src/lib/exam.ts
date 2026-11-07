@@ -1,5 +1,10 @@
 import type { Phase } from './types';
-export const phaseLabels: Record<Phase, string> = { warmup: 'Ankommen', argument: 'Meinung begründen', challenge: 'Perspektive wechseln', transfer: 'Ideen übertragen' };
+export const phaseLabels: Record<Phase, string> = {
+  warmup: 'Ankommen',
+  argument: 'Meinung begründen',
+  challenge: 'Perspektive wechseln',
+  transfer: 'Ideen übertragen',
+};
 export function phaseAt(ms: number): Phase {
   if (ms < 120000) return 'warmup';
   if (ms < 300000) return 'argument';

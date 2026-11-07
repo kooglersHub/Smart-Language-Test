@@ -31,49 +31,49 @@
 Files: `src/lib/{profile,exam,timing,transcript,assessment,types}.ts`, `tests/domain.test.ts`, `config/exam.de.md`, Projektkonfiguration.
 Interfaces: `parseProfile(markdown): ExamProfile`; `measureTiming(turn): Timing`; `phaseAt(ms): Phase`; `assessEvidence(turns): boolean`; `exportMarkdown(session): string`.
 
-- [ ] Tests zuerst: ungültige Metadaten, 32-KiB-Grenze, negative/fehlende Zeiten, Phasengrenzen, unzureichende Evidenz, Export mit Teilnehmerzeiten und Profil.
-- [ ] `pnpm test` ausführen und fehlende Funktionen feststellen.
-- [ ] Typen und reine Funktionen implementieren; vollständige Tests grün ausführen.
-- [ ] Commit.
+- [x] Tests zuerst: ungültige Metadaten, 32-KiB-Grenze, negative/fehlende Zeiten, Phasengrenzen, unzureichende Evidenz, Export mit Teilnehmerzeiten und Profil.
+- [x] `pnpm test` ausführen und fehlende Funktionen feststellen.
+- [x] Typen und reine Funktionen implementieren; vollständige Tests grün ausführen.
+- [x] Commit.
 
 ## Task 2: Server und KI-Grenze
 
 Files: `src/server/{provider,guard,prompts}.ts`, `src/app/api/{status,session,chat,assess,live}/route.ts`, `tests/server.test.ts`.
 Interfaces: JSON-Endpunkte mit Schema-Validierung; Sitzungs-Token bindet Profil und Modus. Profil stammt bei jedem KI-Aufruf aus der serverseitigen Sitzung, nicht aus unvalidierten Clientanweisungen.
 
-- [ ] Tests zuerst: keine Schlüssel in Status, fehlender Zugang, Origin/Zugriffsschutz, Größen-/Sitzungslimits, ungültige Bewertung, nicht existente Zitate.
-- [ ] Rote Tests bestätigen; Adapter mit konfigurierbaren Modellen, Timeouts, getrennten Bewertungsanweisungen und begrenzten Eingaben implementieren.
-- [ ] Grüne Tests, Typprüfung und Commit.
+- [x] Tests zuerst: keine Schlüssel in Status, fehlender Zugang, Origin/Zugriffsschutz, Größen-/Sitzungslimits, ungültige Bewertung, nicht existente Zitate.
+- [x] Rote Tests bestätigen; Adapter mit konfigurierbaren Modellen, Timeouts, getrennten Bewertungsanweisungen und begrenzten Eingaben implementieren.
+- [x] Grüne Tests, Typprüfung und Commit.
 
 ## Task 3: Start, Textprüfung, Ergebnis
 
 Files: `src/components/{language-test,setup,exam-view,result-view}.tsx`, `src/hooks/use-exam.ts`, `src/app/{page,layout,globals.css}`; `e2e/exam.spec.ts`.
 Interfaces: `useExam()` verwaltet genau eine laufende Sitzung, monotone Zeiten, Phasen, Einwilligung, Exporte, Abbruch und Wiederholung.
 
-- [ ] Browsertests zuerst: Start nur mit Einwilligung, Profilfehler, Textdialog, Zeitmessung, Abschluss und Download mit simuliertem externem Dienst.
-- [ ] UI mit gut bedienbarer mobiler Darstellung und zugänglichen Zuständen implementieren.
-- [ ] API-Konfigurationsfehler, Timer, 60-Sekunden-Frist, Hintergrundstatus und Request-Abbruch prüfen.
-- [ ] Tests und Produktionsbuild; Commit.
+- [x] Browsertests zuerst: Start nur mit Einwilligung, Profilfehler, Textdialog, Zeitmessung, Abschluss und Download mit simuliertem externem Dienst.
+- [x] UI mit gut bedienbarer mobiler Darstellung und zugänglichen Zuständen implementieren.
+- [x] API-Konfigurationsfehler, Timer, 60-Sekunden-Frist, Hintergrundstatus und Request-Abbruch prüfen.
+- [x] Tests und Produktionsbuild; Commit.
 
 ## Task 4: Live-Audio
 
 Files: `src/lib/audio/{capture,playback,live,turns}.ts`, `public/pcm-worklet.js`, `tests/audio.test.ts`.
 Interfaces: `LiveConversation.start(callbacks)` / `stop()` / `setMuted(boolean)`; lokale Aktivitätsereignisse liefern Zeiten unabhängig von Text-Transkripten.
 
-- [ ] Audioreduzertests zuerst: getrennte Sprechzeiten, partielle Transkripte, unterbrochene Ausgabe, fehlende Ereignisse, erneute Verbindung ohne doppelte Inhalte.
-- [ ] PCM-Eingabe über AudioWorklet, 24-kHz-Ausgabe, Mikrofonberechtigung, Unterbrechungen und Wiederaufnahme implementieren.
-- [ ] Ressourcen bei Abbruch/Fehler/Unmount freigeben. Automatische Wiederaufnahme maximal 30 Sekunden; danach explizites Fortsetzen oder Beenden.
-- [ ] Automatische Tests; echte Audioprüfung nur bei vorhandenem Schlüssel und Mikrofonzugang als bestanden melden.
-- [ ] Commit.
+- [x] Audioreduzertests zuerst: getrennte Sprechzeiten, partielle Transkripte, unterbrochene Ausgabe, fehlende Ereignisse, erneute Verbindung ohne doppelte Inhalte.
+- [x] PCM-Eingabe über AudioWorklet, 24-kHz-Ausgabe, Mikrofonberechtigung, Unterbrechungen und Wiederaufnahme implementieren.
+- [x] Ressourcen bei Abbruch/Fehler/Unmount freigeben. Automatische Wiederaufnahme maximal 30 Sekunden; danach explizites Fortsetzen oder Beenden.
+- [x] Automatische Tests; echte Audioprüfung nur bei vorhandenem Schlüssel und Mikrofonzugang als bestanden melden.
+- [x] Commit.
 
 ## Task 5: Auslieferung
 
 Files: `README.md`, `.env.example`, `.github/workflows/ci.yml`, `docs/implementation-notes.md`.
 
-- [ ] Einrichtung, Profilformat, Providerbedingungen, lokale Nutzung und Prüfungsgrenzen dokumentieren.
-- [ ] Lint, Formatprüfung, Typprüfung, vollständige Unit-/Integrationstests, Browsertests und Produktionsbuild ausführen.
-- [ ] Gesamten Branch unabhängig prüfen lassen, wesentliche Funde beheben und erneut prüfen.
-- [ ] Geprüften Stand auf main synchronisieren; verbleibende externe Voraussetzungen klar nennen.
+- [x] Einrichtung, Profilformat, Providerbedingungen, lokale Nutzung und Prüfungsgrenzen dokumentieren.
+- [x] Lint, Formatprüfung, Typprüfung, vollständige Unit-/Integrationstests, Browsertests und Produktionsbuild ausführen.
+- [x] Gesamten Branch unabhängig prüfen lassen, wesentliche Funde beheben und erneut prüfen.
+- [x] Geprüften Stand auf main synchronisieren; verbleibende externe Voraussetzungen klar nennen.
 
 ## Ausführungsnotizen
 

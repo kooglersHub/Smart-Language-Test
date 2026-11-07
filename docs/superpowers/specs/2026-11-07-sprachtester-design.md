@@ -57,7 +57,7 @@ Standarddatei: `config/exam.de.md`. Sie liegt im Repository und kann ohne Änder
 
 Die Datei enthält optional einen eingeschränkten YAML-Vorspann sowie lesbare Abschnitte für Kontext, Themen und Aufgaben. Beispiel:
 
-````markdown
+```markdown
 ---
 title: Alltag und Arbeitswelt
 targetLevel: B2
@@ -65,21 +65,25 @@ durationMinutes: 10
 ---
 
 ## Kontext
+
 Ein Gespräch mit einer erwachsenen Person über Alltag und Beruf.
 
 ## Themen
+
 - Lernen und Weiterbildung
 - Zusammenarbeit im Homeoffice
 
 ## Aufgaben
+
 - Beschreibe eine Erfahrung, bei der du etwas Neues lernen musstest.
 - Wäge Vor- und Nachteile von Homeoffice ab und begründe deine Meinung.
 - Reagiere auf das Gegenargument, dass Zusammenarbeit nur im Büro funktioniert.
 
 ## Transferaufgabe
+
 Du organisierst die Zusammenarbeit eines neuen Teams. Schlage Regeln vor
 und erkläre, wie du unterschiedliche Bedürfnisse berücksichtigen würdest.
-````
+```
 
 `title` ist optional und höchstens 120 Zeichen lang. `targetLevel` darf in Version 1 nur B2 sein, `durationMinutes` nur 10; fehlende Werte erhalten diese Standards. Der Upload akzeptiert UTF-8-Markdown bis 32 KiB, höchstens 20 Themen/Aufgaben pro Abschnitt, und zeigt Validierungsfehler vor dem Start. Mindestens ein Thema oder eine Aufgabe muss vorhanden sein. Eine fehlende Transferaufgabe ergänzt die KI passend zum Thema.
 
@@ -91,13 +95,13 @@ Jede Sitzung erhält eine Kennung, Startzeit in UTC, Modus, Profil-Snapshot und 
 
 Für eine vollständige Frage-Antwort-Runde werden getrennt erfasst:
 
-| Messwert | Gespräch | Textchat |
-| --- | --- | --- |
-| Frage vollständig angekommen | Ende der tatsächlich abgespielten KI-Ausgabe | Ende der sichtbaren KI-Ausgabe |
-| Antwortbeginn | Erster erkannter Sprechbeginn nach der Frage | Erste inhaltliche Eingabe in den Antwortentwurf |
-| Reaktionszeit | Sprechbeginn minus Frageende | Eingabebeginn minus Frageende |
-| Antwortdauer | Ende minus Beginn der erkannten Sprache | Absenden minus Eingabebeginn |
-| Gesamte Antwortzeit | Antwortende minus Frageende | Absenden minus Frageende |
+| Messwert                     | Gespräch                                     | Textchat                                        |
+| ---------------------------- | -------------------------------------------- | ----------------------------------------------- |
+| Frage vollständig angekommen | Ende der tatsächlich abgespielten KI-Ausgabe | Ende der sichtbaren KI-Ausgabe                  |
+| Antwortbeginn                | Erster erkannter Sprechbeginn nach der Frage | Erste inhaltliche Eingabe in den Antwortentwurf |
+| Reaktionszeit                | Sprechbeginn minus Frageende                 | Eingabebeginn minus Frageende                   |
+| Antwortdauer                 | Ende minus Beginn der erkannten Sprache      | Absenden minus Eingabebeginn                    |
+| Gesamte Antwortzeit          | Antwortende minus Frageende                  | Absenden minus Frageende                        |
 
 Diese Metriken werden verständlich benannt: etwa „Nach 2,4 s angefangen · 31 s gesprochen“ oder „Nach 4 s angefangen · nach insgesamt 47 s abgesendet“. Im Textmodus wird die Antwortdauer als Bearbeitungsdauer bezeichnet, da sie auch Pausen enthält. Die App erfasst Zeitereignisse und abgeschickten Text, keine Folge einzelner Tastendrücke und keine gelöschten Entwürfe.
 
@@ -141,4 +145,3 @@ Zur ersten lokalen Version gehört eine `.env.example`, niemals ein echter Schl�
 ## Noch zu bestätigen
 
 Dieser Entwurf nimmt eine lokale, funktionsfähige erste Version mit beiden Modi und optionalem Profil-Upload an. Nach inhaltlicher Freigabe folgen der konkrete Implementierungsplan und die Umsetzung. Anbieterwahl und Hosting werden anhand der technischen Anforderungen und verfügbarer Zugänge festgelegt.
-

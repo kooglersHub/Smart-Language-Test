@@ -1,16 +1,31 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { authorizeRequest, readBody, SessionStore, HttpError } from '@/server/guard';
-import { conversationInstruction, assessmentInstruction } from '@/server/prompts';
+import {
+  authorizeRequest,
+  readBody,
+  SessionStore,
+  HttpError,
+} from '@/server/guard';
+import {
+  conversationInstruction,
+  assessmentInstruction,
+} from '@/server/prompts';
 import { parseProfile } from '@/lib/profile';
 
 afterEach(() => vi.unstubAllEnvs());
-const request = (origin = 'http://localhost:3000', code = '') => new Request('http://localhost:3000/api/session', { method: 'POST', headers: { origin, 'x-access-code': code }, body: '{}' });
+const request = (origin = 'http://localhost:3000', code = '') =>
+  new Request('http://localhost:3000/api/session', {
+    method: 'POST',
+    headers: { origin, 'x-access-code': code },
+    body: '{}',
+  });
 
 describe('API-Zugriff', () => {
   it('verweigert fremde Origins und im Produktionsbetrieb fehlende Zugangscodes', () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('ACCESS_CODE', '');
-    expect(() => authorizeRequest(request('https://fremd.example'))).toThrow(HttpError);
+    expect(() => authorizeRequest(request('https://fremd.example'))).toThrow(
+      HttpError,
+    );
     expect(() => authorizeRequest(request())).not.toThrow();
     vi.stubEnv('NODE_ENV', 'production');
     expect(() => authorizeRequest(request())).toThrow(HttpError);
@@ -18,16 +33,44 @@ describe('API-Zugriff', () => {
   it('verlangt den konfigurierten Zugangscode auch lokal', () => {
     vi.stubEnv('ACCESS_CODE', 'sehr-langer-geheimer-code');
     expect(() => authorizeRequest(request())).toThrow();
-    expect(() => authorizeRequest(request('http://localhost:3000', 'sehr-langer-geheimer-code'))).not.toThrow();
+    expect(() =>
+      authorizeRequest(
+        request('http://localhost:3000', 'sehr-langer-geheimer-code'),
+      ),
+    ).not.toThrow();
   });
   it('begrenzt den eingelesenen Body tatsächlich statt nur dem Header zu vertrauen', async () => {
-    await expect(readBody(new Request('http://localhost', { method: 'POST', body: 'x'.repeat(50) }), 32)).rejects.toThrow();
-    await expect(readBody(new Request('http://localhost', { method: 'POST', body: '{"a":1}' }), 32)).resolves.toEqual({ a: 1 });
+    await expect(
+      readBody(
+        new Request('http://localhost', {
+          method: 'POST',
+          body: 'x'.repeat(50),
+        }),
+        32,
+      ),
+    ).rejects.toThrow();
+    await expect(
+      readBody(
+        new Request('http://localhost', { method: 'POST', body: '{"a":1}' }),
+        32,
+      ),
+    ).resolves.toEqual({ a: 1 });
   });
 });
 
 describe('Flüchtige Sitzungen', () => {
   const profile = parseProfile('## Themen\n- Umwelt');
+  it('entfernt abgelaufene Sitzungen auch ohne weitere Serveranfragen', () => {
+    vi.useFakeTimers();
+    try {
+      const store = new SessionStore(() => 100);
+      const session = store.create('text', profile);
+      vi.advanceTimersByTime(1800001);
+      expect(() => store.get(session.id)).toThrow();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it('bindet Modus und Profil, begrenzt Aufrufe und läuft ab', () => {
     let now = 100;
     const store = new SessionStore(() => now);

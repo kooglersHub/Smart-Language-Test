@@ -8,7 +8,7 @@ import { exportMarkdown } from '@/lib/transcript';
 import { LiveConversation, type LiveCredentials } from '@/lib/audio/live';
 
 export type Step = 'setup' | 'connecting' | 'running' | 'finishing' | 'result';
-export function useExam() {
+export function useExam(invitationToken?: string) {
   const [step, setStepState] = useState<Step>('setup');
   const stepRef = useRef<Step>('setup');
   const [record, setRecord] = useState<SessionRecord>();
@@ -165,7 +165,7 @@ export function useExam() {
   const assess = async () => {
     const current = recordRef.current;
     if (!current || busyRef.current) return;
-    if (!hasEvidence(current.turns)) {
+    if (!invitationToken && !hasEvidence(current.turns)) {
       update((r) => ({ ...r, assessment: insufficientAssessment() }));
       return;
     }
@@ -175,7 +175,11 @@ export function useExam() {
     try {
       const result = await api<{ assessment: Assessment }>(
         'assess',
-        { turns: current.turns },
+        {
+          turns: current.turns,
+          events: current.events,
+          elapsedMs: current.elapsedMs,
+        },
         current.id,
       );
       if (currentRun === run.current)
@@ -201,11 +205,30 @@ export function useExam() {
       return;
     setStep('finishing');
     controller.current?.abort();
-    const at = now();
+    const at = Math.min(now(), 660000);
     const finishingRun = run.current;
     const conversation = live.current;
     if (conversation) await conversation.finish();
     if (finishingRun !== run.current) return;
+    let savingError = '';
+    if (invitationToken && recordRef.current) {
+      try {
+        await api(
+          'progress',
+          {
+            turns: recordRef.current.turns,
+            events: recordRef.current.events,
+            elapsedMs: Math.min(at, 660000),
+          },
+          recordRef.current.id,
+        );
+      } catch (failure) {
+        savingError =
+          failure instanceof Error
+            ? failure.message
+            : 'Das Transkript konnte nicht gespeichert werden.';
+      }
+    }
     ++run.current;
     live.current = undefined;
     setWorking(false);
@@ -224,6 +247,10 @@ export function useExam() {
     setDraft('');
     draftRef.current = '';
     draftStart.current = undefined;
+    if (savingError) {
+      setError(savingError);
+      return;
+    }
     await assess();
   };
   const finishRef = useRef(finish);
@@ -299,8 +326,16 @@ export function useExam() {
         mode,
         markdown,
         consent: true,
+        invitationToken,
       });
-      if (currentRun !== run.current) return;
+      if (currentRun !== run.current) {
+        if (invitationToken)
+          void fetch('/api/session', {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${id}` },
+          }).catch(() => console.error('invitation_release_failed'));
+        return;
+      }
       const initial: SessionRecord = {
         id,
         mode,
@@ -364,10 +399,26 @@ export function useExam() {
       ownedConversation?.stop();
       if (live.current === ownedConversation) live.current = undefined;
       if (currentRun === run.current) {
+        let cleanupError = '';
+        if (invitationToken && recordRef.current) {
+          try {
+            const response = await fetch('/api/session', {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${recordRef.current.id}`,
+                'x-access-code': code.current,
+              },
+            });
+            if (!response.ok) throw new Error();
+          } catch {
+            cleanupError =
+              ' Die Einladung konnte nicht automatisch freigegeben werden.';
+          }
+        }
         setError(
-          failure instanceof Error
+          (failure instanceof Error
             ? failure.message
-            : 'Der Test konnte nicht gestartet werden.',
+            : 'Der Test konnte nicht gestartet werden.') + cleanupError,
         );
         setStep('setup');
       }
@@ -462,7 +513,8 @@ export function useExam() {
   };
   const reset = () => {
     ++run.current;
-    controller.current?.abort();
+    if (!(invitationToken && stepRef.current === 'connecting'))
+      controller.current?.abort();
     live.current?.stop();
     live.current = undefined;
     const id = recordRef.current?.id;
@@ -485,6 +537,34 @@ export function useExam() {
     code.current = '';
     requestId.current = undefined;
   };
+  useEffect(() => {
+    if (!invitationToken || step !== 'running') return;
+    const timeout = setInterval(() => {
+      const current = recordRef.current;
+      if (!current) return;
+      void fetch('/api/progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${current.id}`,
+        },
+        body: JSON.stringify({
+          turns: current.turns,
+          events: current.events,
+          elapsedMs: Math.min(now(), 660000),
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error('Speichern fehlgeschlagen.');
+        })
+        .catch(() =>
+          setError(
+            'Das Transkript konnte nicht gespeichert werden. Bitte sichere es über „Transkript sichern“.',
+          ),
+        );
+    }, 5000);
+    return () => clearInterval(timeout);
+  }, [invitationToken, step, now]);
   return {
     step,
     record,

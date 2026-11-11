@@ -5,8 +5,14 @@ import { useExam } from '@/hooks/use-exam';
 import { Setup } from './setup';
 import { ExamView } from './exam-view';
 import { ResultView } from './result-view';
-export function LanguageTest({ defaultMarkdown }: { defaultMarkdown: string }) {
-  const exam = useExam();
+export function LanguageTest({
+  defaultMarkdown,
+  invitationToken,
+}: {
+  defaultMarkdown: string;
+  invitationToken?: string;
+}) {
+  const exam = useExam(invitationToken);
   return (
     <div className="site-shell">
       <header className="site-header">
@@ -18,6 +24,7 @@ export function LanguageTest({ defaultMarkdown }: { defaultMarkdown: string }) {
         </Link>
         <div className="header-right">
           <span>Sprache verbindet.</span>
+          <Link href="/verwaltung">Für Teams</Link>
           <a
             href="https://www.coe.int/en/web/common-european-framework-reference-languages"
             target="_blank"
@@ -34,7 +41,11 @@ export function LanguageTest({ defaultMarkdown }: { defaultMarkdown: string }) {
           </div>
         )}
         {exam.step === 'setup' && (
-          <Setup exam={exam} defaultMarkdown={defaultMarkdown} />
+          <Setup
+            exam={exam}
+            defaultMarkdown={defaultMarkdown}
+            invited={Boolean(invitationToken)}
+          />
         )}
         {exam.step === 'connecting' && (
           <section className="connecting" role="status">
@@ -67,7 +78,9 @@ export function LanguageTest({ defaultMarkdown }: { defaultMarkdown: string }) {
           </section>
         )}
         {exam.step === 'running' && exam.record && <ExamView exam={exam} />}
-        {exam.step === 'result' && exam.record && <ResultView exam={exam} />}
+        {exam.step === 'result' && exam.record && (
+          <ResultView exam={exam} invited={Boolean(invitationToken)} />
+        )}
       </main>
       <footer className="site-footer">
         <span>Ein kleiner Schritt. Mehr Sprachgefühl.</span>

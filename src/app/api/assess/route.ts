@@ -9,7 +9,8 @@ import {
 } from '@/server/guard';
 import { evaluate } from '@/server/provider';
 import { hasEvidence, insufficientAssessment } from '@/lib/assessment';
-import { transcriptSchema } from '@/server/schemas';
+import { eventsSchema, transcriptSchema } from '@/server/schemas';
+import { adminStore } from '@/server/admin-store';
 export const runtime = 'nodejs';
 export async function POST(request: Request) {
   let unlock: (() => void) | undefined;
@@ -17,10 +18,25 @@ export async function POST(request: Request) {
     authorizeRequest(request);
     const session = sessionFrom(request);
     const input = z
-      .object({ turns: transcriptSchema })
+      .object({
+        turns: transcriptSchema,
+        elapsedMs: z.number().min(0).max(660000).optional(),
+        events: eventsSchema.optional(),
+      })
       .parse(await readBody(request));
-    if (!hasEvidence(input.turns))
-      return Response.json({ assessment: insufficientAssessment() });
+    if (!hasEvidence(input.turns)) {
+      const assessment = insufficientAssessment();
+      if (session.invitation)
+        adminStore().saveProgress(
+          session.id,
+          input.turns,
+          assessment,
+          input.elapsedMs ?? 0,
+          true,
+          input.events,
+        );
+      return Response.json({ assessment });
+    }
     if (session.assessment)
       return Response.json({ assessment: session.assessment });
     if (session.busy)
@@ -33,8 +49,18 @@ export async function POST(request: Request) {
     unlock = () => {
       session.busy = false;
     };
-    session.assessment = await evaluate(session.mode, input.turns);
-    return Response.json({ assessment: session.assessment });
+    const assessment = await evaluate(session.mode, input.turns);
+    if (session.invitation)
+      adminStore().saveProgress(
+        session.id,
+        input.turns,
+        assessment,
+        input.elapsedMs ?? 0,
+        true,
+        input.events,
+      );
+    session.assessment = assessment;
+    return Response.json({ assessment });
   } catch (error) {
     return errorResponse(error);
   } finally {

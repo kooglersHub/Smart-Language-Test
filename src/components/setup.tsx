@@ -23,9 +23,11 @@ interface ApiStatus {
 export function Setup({
   exam,
   defaultMarkdown,
+  invited = false,
 }: {
   exam: ExamController;
   defaultMarkdown: string;
+  invited?: boolean;
 }) {
   const [mode, setMode] = useState<Mode>('voice');
   const [markdown, setMarkdown] = useState(defaultMarkdown);
@@ -198,17 +200,19 @@ export function Setup({
             {profileResult.profile?.tasks.length ? (
               <p>{profileResult.profile.tasks.length} vorbereitete Aufgaben</p>
             ) : null}
-            <label className="upload-button">
-              <Upload size={15} /> Eigenes Markdown laden
-              <input
-                type="file"
-                accept=".md,text/markdown"
-                onChange={(e) => {
-                  void upload(e.target.files?.[0]);
-                  e.target.value = '';
-                }}
-              />
-            </label>
+            {!invited && (
+              <label className="upload-button">
+                <Upload size={15} /> Eigenes Markdown laden
+                <input
+                  type="file"
+                  accept=".md,text/markdown"
+                  onChange={(e) => {
+                    void upload(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+            )}
             <small>Themen, Kontext und Aufgaben · UTF-8 · bis 32 KiB</small>
             {markdown !== defaultMarkdown && (
               <button
@@ -235,20 +239,29 @@ export function Setup({
         )}
         {status && !status.configured && (
           <div className="config-notice">
-            <strong>Fast bereit – der KI-Zugang fehlt noch.</strong>
-            <p>
-              Trage <code>GEMINI_API_KEY</code> in <code>.env.local</code> ein
-              und starte den Server neu.
-            </p>
+            {invited ? (
+              <>
+                <strong>Der Test ist derzeit nicht verfügbar.</strong>
+                <p>Bitte wende dich an die Person, die dich eingeladen hat.</p>
+              </>
+            ) : (
+              <>
+                <strong>Fast bereit – der KI-Zugang fehlt noch.</strong>
+                <p>
+                  Trage <code>GEMINI_API_KEY</code> in <code>.env.local</code>{' '}
+                  ein und starte den Server neu.
+                </p>
+              </>
+            )}
           </div>
         )}
-        {status && !status.productionReady && (
+        {status && !status.productionReady && !invited && (
           <p className="error" role="alert">
             Für den Produktivbetrieb muss ein Zugangscode mit mindestens 16
             Zeichen eingerichtet sein.
           </p>
         )}
-        {status?.needsAccessCode && (
+        {status?.needsAccessCode && !invited && (
           <label className="field-label">
             Zugangscode
             <input
@@ -270,6 +283,8 @@ export function Setup({
             Ich bin mit der Verarbeitung meiner{' '}
             {mode === 'voice' ? 'Sprach- und Textdaten' : 'Texteingaben'} durch
             Google Gemini für diesen Test einverstanden.{' '}
+            {invited &&
+              'Mein Transkript, meine Antwortzeiten und das Ergebnis werden vom einladenden Betreiber gespeichert und sind für ihn einsehbar. '}
             <a
               href="https://ai.google.dev/gemini-api/terms"
               target="_blank"
@@ -284,16 +299,18 @@ export function Setup({
           disabled={
             !consent ||
             !status?.configured ||
-            !status.productionReady ||
+            (!invited && !status.productionReady) ||
             Boolean(profileError || profileResult.error) ||
-            (status.needsAccessCode && !code.trim())
+            (!invited && status.needsAccessCode && !code.trim())
           }
           onClick={() => void exam.begin(mode, markdown, code)}
         >
           Test starten <ArrowRight size={19} />
         </button>
         <p className="privacy-note">
-          Keine Audioaufnahme in der App. Transkript nur für diese Sitzung.
+          {invited
+            ? 'Keine Audioaufnahme in der App. Das Transkript wird für den Betreiber gespeichert.'
+            : 'Keine Audioaufnahme in der App. Transkript nur für diese Sitzung.'}
           <br />
           Beim KI-Anbieter gelten dessen Datenbedingungen.
         </p>

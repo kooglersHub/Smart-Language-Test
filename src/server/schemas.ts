@@ -23,3 +23,12 @@ export const chatSchema = z.object({
   elapsedMs: z.number().min(0).max(660000),
   requestId: z.string().uuid(),
 });
+export const eventsSchema = z
+  .array(
+    z.object({
+      type: z.string().max(120),
+      atMs: z.number().finite().min(0).max(3600000),
+      detail: z.string().max(500).optional(),
+    }),
+  )
+  .max(1000);

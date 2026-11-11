@@ -9,7 +9,7 @@ export class HttpError extends Error {
     super(message);
   }
 }
-export function authorizeRequest(request: Request) {
+export function authorizeOrigin(request: Request) {
   const origin = request.headers.get('origin');
   const url = new URL(request.url);
   // Next can reconstruct the internal URL with localhost even for a loopback
@@ -19,6 +19,13 @@ export function authorizeRequest(request: Request) {
     `${url.protocol}//${request.headers.get('host') || url.host}`;
   if (!origin || origin !== expectedOrigin)
     throw new HttpError(403, 'Diese Anfrage stammt nicht von der Testseite.');
+  return expectedOrigin;
+}
+export function authorizeRequest(request: Request, invitation = false) {
+  const expectedOrigin = authorizeOrigin(request);
+  const sessionId =
+    request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/)?.[1] ?? '';
+  if (invitation || (sessionId && sessions.get(sessionId).invitation)) return;
   const code = process.env.ACCESS_CODE ?? '';
   if (process.env.NODE_ENV === 'production' && code.length < 16)
     throw new HttpError(
@@ -82,6 +89,7 @@ interface ServerSession {
   busy: boolean;
   replies: Map<string, string>;
   assessment?: unknown;
+  invitation?: boolean;
 }
 export class SessionStore {
   private sessions = new Map<string, ServerSession>();

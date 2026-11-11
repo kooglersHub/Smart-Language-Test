@@ -15,6 +15,18 @@ pnpm dev
 
 Öffne <http://127.0.0.1:3000>. Ohne API-Schlüssel ist die Oberfläche sichtbar; eine echte Prüfung bleibt gesperrt. Es gibt keine simulierten Testergebnisse im Produkt. Schlüssel gehören ausschließlich in `.env.local` oder die Serverumgebung.
 
+## Bewerberverwaltung
+
+Unter <http://127.0.0.1:3000/verwaltung> gibt es einen geschützten Bereich für Themenprofile, Einladungen und Ergebnisse. Vor dem ersten Login in `.env.local` `ADMIN_USERNAME` und ein mindestens 16 Zeichen langes `ADMIN_PASSWORD` setzen und den Server neu starten. Das Passwort wird bei der ersten Anmeldung mit einem zufälligen Salt und scrypt verarbeitet; danach wird der gespeicherte Hash für die Anmeldung verwendet. Eine spätere Änderung der Umgebungsvariable ändert das bereits eingerichtete Passwort nicht.
+
+Nach der Anmeldung eine `.md`-Datei hochladen, optional einen Bewerbernamen angeben und einen Einladungslink erstellen. Der Link wird **nur einmal** angezeigt; sofort kopieren und selbst an die Person weitergeben. Ein Link ermöglicht einen Test und verfällt nach der gewählten Gültigkeitsdauer. Profile sind in Einladungen als Snapshot gespeichert. Ergebnisse einschließlich Transkript und Antwortzeiten sind in der Übersicht abrufbar. Einzelne Einladungen oder Ergebnisse lassen sich löschen; Links können vor dem Start widerrufen werden.
+
+Die Datenbank liegt standardmäßig in `data/sprachraum.sqlite` und ist von Git ausgeschlossen. `DATABASE_PATH` kann auf einen anderen persistenten Speicherpfad gesetzt werden. Abgeschlossene oder begonnene Prüfungen werden 90 Tage nach letzter Aktivität automatisch gelöscht; abgelaufene ungenutzte Einladungen nach weiteren 90 Tagen. Die Löschroutine läuft beim Serverstart und anschließend stündlich. Backups, Kopien und Betriebslogs müssen durch den Betreiber ebenfalls nach dessen Löschkonzept verwaltet werden. Vor Sicherung einer laufenden SQLite-Datenbank ein konsistentes SQLite-Backup erstellen; Wiederherstellung und Löschfristen regelmäßig prüfen.
+
+Ergebnisse eingehender Einladungen werden während des Tests gespeichert; die Verarbeitung durch Gemini und die Speicherung beim Betreiber erfordern die angezeigte Einwilligung. Ein gestarteter Link kann derzeit nach einem Neuladen oder Serverneustart nicht fortgesetzt werden. Bereits gespeicherte Antworten bleiben im Verwaltungsbereich einsehbar; für einen erneuten Versuch muss eine neue Einladung erstellt werden. Roh-Audio wird nicht gespeichert.
+
+Die lokale Adresse funktioniert nur auf diesem Rechner. Für externe Bewerber ist ein separater Node-Server mit HTTPS und einem dauerhaften Speicherlaufwerk erforderlich; SQLite auf einem kurzlebigen Serverless-Dateisystem ist ungeeignet. Ein vollständiger öffentlicher Betrieb benötigt außerdem eigene Datenschutzhinweise und ein geeignetes Backup- und Betriebskonzept.
+
 Der Server bindet standardmäßig nur an `127.0.0.1`. Audio benötigt Mikrofonfreigabe und einen sicheren Browserkontext: localhost/Loopback oder HTTPS. Für Gespräche werden AudioWorklet, Web Audio und WebSocket benötigt; aktuelle Chromium-Browser sind die Referenz für die automatisierte Browserprüfung.
 
 ## Was enthalten ist

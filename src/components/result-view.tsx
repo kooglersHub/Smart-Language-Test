@@ -10,7 +10,13 @@ import {
 import type { ExamController } from '@/hooks/use-exam';
 import { clock } from '@/lib/timing';
 import { Transcript } from './transcript';
-export function ResultView({ exam }: { exam: ExamController }) {
+export function ResultView({
+  exam,
+  invited = false,
+}: {
+  exam: ExamController;
+  invited?: boolean;
+}) {
   const record = exam.record!;
   const assessment = record.assessment;
   return (
@@ -49,12 +55,15 @@ export function ResultView({ exam }: { exam: ExamController }) {
             <FileJson size={17} /> JSON herunterladen
           </button>
         </div>
-        <button className="text-button new-test" onClick={exam.reset}>
-          Sitzungsdaten löschen & neu starten <ArrowRight size={17} />
-        </button>
+        {!invited && (
+          <button className="text-button new-test" onClick={exam.reset}>
+            Sitzungsdaten löschen & neu starten <ArrowRight size={17} />
+          </button>
+        )}
         <p className="sidebar-note">
-          Beim Verlassen gehen die Daten in dieser App verloren. Lade dein
-          Transkript vorher herunter, wenn du es behalten möchtest.
+          {invited
+            ? 'Dein Ergebnis und Transkript werden für den einladenden Betreiber gespeichert. Lade dein Transkript herunter, wenn du eine eigene Kopie behalten möchtest.'
+            : 'Beim Verlassen gehen die Daten in dieser App verloren. Lade dein Transkript vorher herunter, wenn du es behalten möchtest.'}
         </p>
       </section>
       <section className="result-card">
